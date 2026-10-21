@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Executive Dashboard & AI Decision Tool - PT Maju Bersama | UNIB & BRIN</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#0284c7',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        [x-cloak] { display: none !important; }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(100, 116, 139, 0.5);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body x-data="appData()" :class="{ 'dark bg-slate-950 text-slate-100': darkMode, 'bg-slate-50 text-slate-800': !darkMode }" class="font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-slate-900/80 border-b border-slate-200 dark:border-slate-800 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-sky-500/20">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-slate-900 dark:text-white leading-tight text-sm sm:text-base">Executive Analytics & AI Portal</h1>
+                    <p class="text-xs text-sky-600 dark:text-sky-400 font-medium">Practitioner Lecture - UNIB x BRIN</p>
+                </div>
+            </div>
+
+            <!-- Navigation Links -->
+            <nav class="hidden md:flex items-center space-x-1 lg:space-x-3 text-xs lg:text-sm font-medium">
+                <a href="#summary" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Executive Summary</a>
+                <a href="#crisp-dm" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Framework CRISP-DM</a>
+                <a href="#dashboard" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">Data Dashboard</a>
+                <a href="#simulator" class="px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">AI Risk Simulator</a>
+            </nav>
+
+            <div class="flex items-center space-x-2">
+                <button @click="darkMode = !darkMode" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Toggle Theme">
+                    <i x-show="darkMode" class="fa-solid fa-sun text-amber-400"></i>
+                    <i x-show="!darkMode" class="fa-solid fa-moon text-slate-700"></i>
+                </button>
+                <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden p-2 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300">
+                    <i :class="mobileMenuOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Nav -->
+        <div x-show="mobileMenuOpen" x-cloak class="md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-4 pt-2 pb-4 space-y-1 shadow-xl">
+            <a href="#summary" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium">Executive Summary</a>
+            <a href="#crisp-dm" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium">Framework CRISP-DM</a>
+            <a href="#dashboard" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium">Data Dashboard</a>
+            <a href="#simulator" @click="mobileMenuOpen = false" class="block px-3 py-2 rounded-lg text-sm font-medium">AI Risk Simulator</a>
+        </div>
+    </header>
+
+    <main class="flex-grow">
+        <!-- Hero Section & Context -->
+        <section class="py-12 lg:py-16 border-b border-slate-200 dark:border-slate-800 bg-gradient-to-b from-sky-500/5 via-transparent to-transparent">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="max-w-3xl">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-300 mb-4 border border-sky-200 dark:border-sky-800">
+                        <i class="fa-solid fa-chalkboard-user"></i> Kuliah Praktisi Informatika UNIB x BRIN
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white leading-tight mb-4">
+                        Studi Kasus Data Analytics & AI: <span class="bg-gradient-to-r from-sky-500 to-indigo-500 bg-clip-text text-transparent">Optimasi Arus Kas PT Maju Bersama</span>
+                    </h1>
+                    <p class="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed mb-6">
+                        Berdasarkan materi pemateri <em class="text-sky-600 dark:text-sky-400 not-italic font-semibold">"Make Sense of Data with Analysis and AI"</em> oleh 
+                        <strong>Andria Arisal, S.T., M.Sc.</strong> (Senior Researcher - Pusat Riset Sains Data dan Informasi, BRIN).
+                    </p>
+                    
+                    <div class="flex flex-wrap items-center gap-3 text-xs font-medium text-slate-600 dark:text-slate-400">
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-building-columns text-sky-500"></i> Universitas Bengkulu</span>
+                        <span>&bull;</span>
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-microscope text-indigo-500"></i> BRIN</span>
+                        <span>&bull;</span>
+                        <span class="flex items-center gap-1.5"><i class="fa-solid fa-brain text-amber-500"></i> Human-in-the-Loop Decision System</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 1: Executive Summary & Problem Framing -->
+        <section id="summary" class="py-12 border-b border-slate-200 dark:border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-semibold text-xs uppercase tracking-wider mb-2">
+                    <i class="fa-solid fa-briefcase"></i> Modul 1
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-6">Executive Summary & Diagnosa Bisnis</h2>
+
+                <!-- Financial Metrics Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <div class="text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">Sales Revenue</div>
+                        <div class="text-2xl font-bold text-emerald-500 mt-1 flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-trend-up"></i> +18.4%
+                        </div>
+                        <p class="text-xs text-slate-500 mt-1">Penjualan tumbuh pesat</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-rose-200 dark:border-rose-950/60 shadow-sm">
+                        <div class="text-xs text-rose-500 font-semibold uppercase">Net Profit</div>
+                        <div class="text-2xl font-bold text-rose-500 mt-1 flex items-center gap-2">
+                            <i class="fa-solid fa-arrow-trend-down"></i> -14.2%
+                        </div>
+                        <p class="text-xs text-rose-500/80 mt-1">Keuntungan bersih merosot</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-amber-200 dark:border-amber-950/60 shadow-sm">
+                        <div class="text-xs text-amber-500 font-semibold uppercase">Piutang (Receivables)</div>
+                        <div class="text-2xl font-bold text-amber-500 mt-1 flex items-center gap-2">
+                            <i class="fa-solid fa-triangle-exclamation"></i> +300%
+                        </div>
+                        <p class="text-xs text-amber-500/80 mt-1">Gagal/Lambat Bayar Melonjak</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-rose-200 dark:border-rose-950/60 shadow-sm">
+                        <div class="text-xs text-rose-500 font-semibold uppercase">Cash Flow Operasional</div>
+                        <div class="text-2xl font-bold text-rose-500 mt-1 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-minus"></i> -$51,200
+                        </div>
+                        <p class="text-xs text-rose-500/80 mt-1">Krisis likuiditas kas nyata</p>
+                    </div>
+                </div>
+
+                <!-- Problem Narrative & Analytic Framing -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-circle-exclamation text-rose-500"></i> Paradoks Pertumbuhan PT Maju Bersama
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
+                            PT Maju Bersama mengalami paradoks bisnis yang membahayakan: Omset penjualan meningkat signifikan karena ekspansi agresif tim sales. Namun, perusahaan justru mengalami <strong>krisis arus kas mendalam</strong> karena pembayaran dari pelanggan terlambat hingga lebih dari 30-90 hari.
+                        </p>
+                        <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                            Beban kredit macet memaksa perusahaan menarik pinjaman jangka pendek operasional, yang akhirnya tergerus dan memotong margin laba bersih hingga 14.2%.
+                        </p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                            <i class="fa-solid fa-lightbulb text-amber-500"></i> Translasi Masalah ke Pertanyaan Analitis
+                        </h3>
+                        <ul class="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-circle-question text-sky-500 mt-1"></i>
+                                <span><strong>Problem Bisnis:</strong> Mengapa uang kas tidak masuk tepat waktu padahal omset penjualan tinggi?</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-arrow-right text-indigo-500 mt-1"></i>
+                                <span><strong>Analytic Question:</strong> Karakteristik &amp; pola apa yang memprediksi risiko <em>Late Payment (>30 hari)</em> pada invoice?</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <i class="fa-solid fa-bullseye text-emerald-500 mt-1"></i>
+                                <span><strong>Solusi AI & Action:</strong> Membangun model klasifikasi Machine Learning untuk memprediksi skor risiko invoice secara instan serta memberikan rekomendasi tindakan preskriptif.</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: Framework CRISP-DM & Metodologi -->
+        <section id="crisp-dm" class="py-12 bg-slate-100/50 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-semibold text-xs uppercase tracking-wider mb-2">
+                    <i class="fa-solid fa-cubes"></i> Modul 2
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-6">Metodologi CRISP-DM & Wawasan Materi Webinar</h2>
+
+                <!-- 6 Steps CRISP-DM Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-10">
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                        <div class="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-xs mx-auto mb-2">1</div>
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white mb-1">Business Understanding</h4>
+                        <p class="text-[11px] text-slate-500">Definisi tujuan kas &amp; kriteria late payment.</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                        <div class="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-xs mx-auto mb-2">2</div>
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white mb-1">Data Understanding</h4>
+                        <p class="text-[11px] text-slate-500">Eksplorasi data transaksi invoice &amp; profil pelanggan.</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-amber-200 dark:border-amber-900/60 text-center">
+                        <div class="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-600 dark:text-amber-400 flex items-center justify-center font-bold text-xs mx-auto mb-2">3</div>
+                        <h4 class="text-xs font-bold text-amber-600 dark:text-amber-400 mb-1">Data Preparation</h4>
+                        <p class="text-[11px] text-slate-500">Cleaning &amp; Pencegahan Leakage (80% effort).</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                        <div class="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-xs mx-auto mb-2">4</div>
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white mb-1">Modeling</h4>
+                        <p class="text-[11px] text-slate-500">Pelatihan Random Forest &amp; Decision Trees.</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 text-center">
+                        <div class="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-950 text-sky-600 dark:text-sky-400 flex items-center justify-center font-bold text-xs mx-auto mb-2">5</div>
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white mb-1">Evaluation</h4>
+                        <p class="text-[11px] text-slate-500">Pengujian Recall, Precision &amp; ROC-AUC.</p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-indigo-200 dark:border-indigo-900/60 text-center">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-xs mx-auto mb-2">6</div>
+                        <h4 class="text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1">Deployment</h4>
+                        <p class="text-[11px] text-slate-500">Integrasi Simulator Human-in-the-Loop.</p>
+                    </div>
+                </div>
+
+                <!-- Critical Speaker Insights -->
+                <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-graduation-cap text-sky-500"></i> Poin Kunci Pemateri (Pak Andria Arisal - BRIN)
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div class="text-rose-500 font-bold text-sm mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-shield-halved"></i> Data Leakage
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Kesalahan fatal saat memasukkan kolom informasi masa depan (seperti <code>overdue_days</code> atau <code>actual_payment_date</code>) ke dalam fitur prediksi. Model terlihat akurat 100% di lab, namun gagal total di lapangan.
+                        </p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div class="text-amber-500 font-bold text-sm mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-trash-can"></i> Garbage In, Garbage Out
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Kualitas model AI sangat bergantung pada kebersihan data. Data mentah dengan missing value, format inkonsisten, atau outlier harus dibersihkan secara intensif pada tahap Data Preparation.
+                        </p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
+                        <div class="text-sky-500 font-bold text-sm mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-scale-unbalanced"></i> Imbalanced Data
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            Jumlah pelanggan macet biasanya jauh lebih sedikit dibanding pelanggan lancar. Mengukur akurasi saja bisa menipu; metrik <strong>Recall &amp; Precision</strong> menjadi penentu utama.
+                        </p>
+                    </div>
+
+                    <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-indigo-200 dark:border-indigo-900/60">
+                        <div class="text-indigo-500 font-bold text-sm mb-1 flex items-center gap-2">
+                            <i class="fa-solid fa-user-check"></i> Human-in-the-Loop
+                        </div>
+                        <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                            AI berfungsi memberi rekomendasi preskriptif dan estimasi skor risiko. Keputusan akhir eksekusi diskon atau pemblokiran fasilitas kredit tetap di tangan manajer manusia.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Interactive Data Dashboard -->
+        <section id="dashboard" class="py-12 border-b border-slate-200 dark:border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-semibold text-xs uppercase tracking-wider mb-2">
+                    <i class="fa-solid fa-chart-column"></i> Modul 3
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-6">Interactive Data &amp; Root-Cause Analytics Dashboard</h2>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+                    <!-- Chart Column -->
+                    <div class="lg:col-span-7 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-4 flex items-center justify-between">
+                            <span>Hubungan Diskon Sales vs Late Payment Ratio</span>
+                            <span class="text-xs font-normal text-slate-500">Berdasarkan Segmen Pelanggan</span>
+                        </h3>
+                        <div class="h-64 relative">
+                            <canvas id="rootCauseChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Findings Summary -->
+                    <div class="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-slate-900 dark:text-white mb-3">Temuan Akar Masalah (Root Cause)</h3>
+                            <ul class="space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-dot text-rose-500 mt-1"></i>
+                                    <span><strong>Obral Diskon Berlebihan:</strong> Sales memberikan diskon kredit tinggi (>15%) ke segmen Retail untuk mengejar target omset tanpa skoring kredit.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-dot text-amber-500 mt-1"></i>
+                                    <span><strong>Term Jatuh Tempo Terlalu Longgar:</strong> Pelanggan Retail diberi jatuh tempo hingga 60 hari, memicu risiko gagal bayar 4x lebih tinggi dibanding Corporate.</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="p-3 bg-slate-100 dark:bg-slate-800 rounded-xl text-xs text-slate-500 mt-4">
+                            <i class="fa-solid fa-info-circle text-sky-500"></i> Hasil analisis eksplorasi dari 1,000 sampel transaksi invoice PT Maju Bersama.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Table Filter -->
+                <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm">
+                    <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                        <h3 class="text-sm font-bold text-slate-900 dark:text-white">Sampel Transaksi Invoice (PT Maju Bersama)</h3>
+                        
+                        <div class="flex items-center gap-2 text-xs">
+                            <label class="text-slate-500">Filter Segmen:</label>
+                            <select x-model="tableFilter" class="px-2.5 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white">
+                                <option value="ALL">Semua Segmen</option>
+                                <option value="Corporate">Corporate</option>
+                                <option value="SME">SME</option>
+                                <option value="Retail">Retail</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead class="bg-slate-50 dark:bg-slate-950/60 text-slate-500 border-b border-slate-200 dark:border-slate-800">
+                                <tr>
+                                    <th class="p-3">Invoice ID</th>
+                                    <th class="p-3">Nama Customer</th>
+                                    <th class="p-3">Segmen</th>
+                                    <th class="p-3">Nilai Invoice</th>
+                                    <th class="p-3">Diskon (%)</th>
+                                    <th class="p-3">Term (Hari)</th>
+                                    <th class="p-3">Status Pembayaran</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                <template x-for="inv in filteredInvoices" :key="inv.id">
+                                    <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                                        <td class="p-3 font-mono font-medium text-sky-600 dark:text-sky-400" x-text="inv.id"></td>
+                                        <td class="p-3 font-medium text-slate-900 dark:text-white" x-text="inv.customer"></td>
+                                        <td class="p-3" x-text="inv.segment"></td>
+                                        <td class="p-3 font-mono" x-text="'$' + inv.amount.toLocaleString()"></td>
+                                        <td class="p-3 font-mono" x-text="inv.discount + '%'"></td>
+                                        <td class="p-3 font-mono" x-text="inv.days + ' Hari'"></td>
+                                        <td class="p-3">
+                                            <span :class="inv.isLate ? 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300 border-rose-300' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-300'" class="px-2 py-0.5 rounded-full text-[10px] font-semibold border">
+                                                <span x-text="inv.isLate ? 'Late Payment (>30d)' : 'On-Time / Lunas'"></span>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: AI Simulator & Human-in-the-Loop Decision Tool -->
+        <section id="simulator" class="py-12 bg-slate-100/50 dark:bg-slate-900/40 border-b border-slate-200 dark:border-slate-800">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center gap-2 text-sky-600 dark:text-sky-400 font-semibold text-xs uppercase tracking-wider mb-2">
+                    <i class="fa-solid fa-robot"></i> Modul 4
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2">Simulator Klasifikasi AI &amp; Human-in-the-Loop Decision Tool</h2>
+                <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-8">
+                    Uji coba prediksi skor risiko Machine Learning secara langsung dan berikan eksekusi keputusan akhir sebagai <strong>Finance Manager (Human-in-the-Loop)</strong>.
+                </p>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    <!-- Simulator Form Inputs -->
+                    <div class="lg:col-span-5 bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm space-y-5">
+                        <h3 class="text-base font-bold text-slate-900 dark:text-white pb-2 border-b border-slate-100 dark:border-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-sliders text-sky-500"></i> Parameter Pengajuan Invoice
+                        </h3>
+
+                        <!-- Nilai Invoice -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-2">
+                                <label class="text-slate-700 dark:text-slate-300">Nilai Invoice ($):</label>
+                                <span class="text-sky-600 dark:text-sky-400 font-mono" x-text="'$' + sim.amount.toLocaleString()"></span>
+                            </div>
+                            <input type="range" min="1000" max="100000" step="1000" x-model.number="sim.amount" class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-sky-600">
+                        </div>
+
+                        <!-- Customer Segment -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Segmen Customer:</label>
+                            <select x-model="sim.customerType" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                                <option value="Corporate">Corporate / Enterprise (Risiko Rendah)</option>
+                                <option value="SME">SME / UKM (Risiko Sedang)</option>
+                                <option value="Retail">Retail Individual (Risiko Tinggi)</option>
+                            </select>
+                        </div>
+
+                        <!-- Diskon Sales -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-2">
+                                <label class="text-slate-700 dark:text-slate-300">Diskon Penjualan (%):</label>
+                                <span class="text-sky-600 dark:text-sky-400 font-mono" x-text="sim.discount + '%'"></span>
+                            </div>
+                            <input type="range" min="0" max="25" step="1" x-model.number="sim.discount" class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-sky-600">
+                        </div>
+
+                        <!-- Hari Jatuh Tempo -->
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-2">
+                                <label class="text-slate-700 dark:text-slate-300">Hari Jatuh Tempo (Term):</label>
+                                <span class="text-sky-600 dark:text-sky-400 font-mono" x-text="sim.days + ' Hari'"></span>
+                            </div>
+                            <input type="range" min="15" max="90" step="15" x-model.number="sim.days" class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-sky-600">
+                        </div>
+
+                        <!-- Payment Track Record -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">Riwayat Pembayaran Sebelumnya:</label>
+                            <select x-model="sim.history" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                                <option value="GOOD">Selalu Tepat Waktu</option>
+                                <option value="MODERATE">Pernah Terlambat < 15 Hari</option>
+                                <option value="POOR">Sering Terlambat > 30 Hari</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Output & Human Decision Tool -->
+                    <div class="lg:col-span-7 space-y-6">
+                        <!-- AI Model Output Card -->
+                        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden">
+                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hasil Klasifikasi AI Model</span>
+                            
+                            <div class="my-4 flex items-center justify-between">
+                                <div>
+                                    <div class="text-4xl font-extrabold font-mono" :class="riskColorClass" x-text="calculatedRiskScore + '%'"></div>
+                                    <div class="text-xs font-medium text-slate-500 mt-1">Estimasi Probabilitas Late Payment</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider" :class="riskBadgeClass" x-text="riskLevel"></span>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="w-full bg-slate-100 dark:bg-slate-800 h-3 rounded-full overflow-hidden mb-4">
+                                <div class="h-full transition-all duration-500" :class="riskBgClass" :style="'width: ' + calculatedRiskScore + '%'"></div>
+                            </div>
+
+                            <!-- AI Prescriptive Action Recommendation -->
+                            <div class="p-4 rounded-xl border text-xs leading-relaxed" :class="riskAlertClass">
+                                <div class="font-bold mb-1 flex items-center gap-2">
+                                    <i class="fa-solid fa-lightbulb"></i> Rekomendasi Preskriptif Sistem AI:
+                                </div>
+                                <p x-text="prescriptiveAction"></p>
+                            </div>
+                        </div>
+
+                        <!-- Human-in-the-Loop Panel -->
+                        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                            <h3 class="text-sm font-bold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                                <i class="fa-solid fa-user-check text-indigo-500"></i> Intervensi Keputusan Manusia (Human-in-the-Loop)
+                            </h3>
+                            <p class="text-xs text-slate-500 mb-4">
+                                Sebagai Finance Manager, Anda berhak menyetujui, menyesuaikan, atau menolak pengajuan kredit berdasarkan pertimbangan konteks bisnis.
+                            </p>
+
+                            <!-- Human Decision Buttons -->
+                            <div class="grid grid-cols-3 gap-3 mb-4">
+                                <button @click="humanDecision = 'APPROVED'" :class="humanDecision === 'APPROVED' ? 'bg-emerald-600 text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'" class="py-2.5 px-3 rounded-xl text-xs transition border border-transparent">
+                                    <i class="fa-solid fa-check-circle mb-1 block text-base"></i> Setujui Kredit
+                                </button>
+                                <button @click="humanDecision = 'ADJUSTED'" :class="humanDecision === 'ADJUSTED' ? 'bg-amber-600 text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-amber-50 dark:hover:bg-amber-950/40'" class="py-2.5 px-3 rounded-xl text-xs transition border border-transparent">
+                                    <i class="fa-solid fa-sliders mb-1 block text-base"></i> Minta DP 50%
+                                </button>
+                                <button @click="humanDecision = 'REJECTED'" :class="humanDecision === 'REJECTED' ? 'bg-rose-600 text-white font-bold' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-rose-50 dark:hover:bg-rose-950/40'" class="py-2.5 px-3 rounded-xl text-xs transition border border-transparent">
+                                    <i class="fa-solid fa-xmark-circle mb-1 block text-base"></i> Tolak Kredit
+                                </button>
+                            </div>
+
+                            <!-- Decision Note Feedback -->
+                            <div x-show="humanDecision" x-cloak class="p-3 bg-slate-50 dark:bg-slate-800/80 rounded-xl border border-slate-200 dark:border-slate-700 text-xs">
+                                <span class="font-semibold text-slate-900 dark:text-white">Status Eksekusi Manajerial:</span>
+                                <span x-show="humanDecision === 'APPROVED'" class="text-emerald-600 dark:text-emerald-400"> Invoice disetujui untuk diterbitkan dengan syarat pembayaran standar.</span>
+                                <span x-show="humanDecision === 'ADJUSTED'" class="text-amber-600 dark:text-amber-400"> Syarat diubah: Wajib pelunasan Down Payment (DP) 50% sebelum pengiriman barang.</span>
+                                <span x-show="humanDecision === 'REJECTED'" class="text-rose-600 dark:text-rose-400"> Pengajuan kredit ditolak. Transaksi wajib pembayaran Cash on Delivery (COD).</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 py-8 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-lg bg-sky-600 flex items-center justify-center text-white font-bold text-sm">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-400">
+                    Studi Kasus Informatika Universitas Bengkulu (UNIB) &amp; Pusat Riset Sains Data dan Informasi (BRIN).
+                </p>
+            </div>
+            <p class="text-xs text-slate-500">
+                &copy; 2026 Interactive Data Analytics &amp; Human-in-the-Loop Decision System.
+            </p>
+        </div>
+    </footer>
+
+    <!-- Alpine.js & Chart.js Logic -->
+    <script>
+        function appData() {
+            return {
+                darkMode: true,
+                mobileMenuOpen: false,
+                tableFilter: 'ALL',
+                humanDecision: null,
+
+                // ML Simulator Inputs
+                sim: {
+                    amount: 45000,
+                    customerType: 'SME',
+                    discount: 12,
+                    days: 45,
+                    history: 'MODERATE'
+                },
+
+                // Sample Invoices Data
+                invoices: [
+                    { id: 'INV-1001', customer: 'PT Nusantara Jaya', segment: 'Corporate', amount: 85000, discount: 5, days: 30, isLate: false },
+                    { id: 'INV-1002', customer: 'Toko Sumber Rejeki', segment: 'Retail', amount: 12000, discount: 18, days: 60, isLate: true },
+                    { id: 'INV-1003', customer: 'CV Anugerah Mandiri', segment: 'SME', amount: 34000, discount: 10, days: 45, isLate: false },
+                    { id: 'INV-1004', customer: 'Toko Bintang Terang', segment: 'Retail', amount: 8500, discount: 20, days: 60, isLate: true },
+                    { id: 'INV-1005', customer: 'PT Global Technology', segment: 'Corporate', amount: 92000, discount: 3, days: 30, isLate: false },
+                    { id: 'INV-1006', customer: 'UD Maju Bersama', segment: 'SME', amount: 22000, discount: 15, days: 60, isLate: true },
+                ],
+
+                get filteredInvoices() {
+                    if (this.tableFilter === 'ALL') return this.invoices;
+                    return this.invoices.filter(i => i.segment === this.tableFilter);
+                },
+
+                // Calculate Risk Score
+                get calculatedRiskScore() {
+                    let score = 15;
+                    score += (this.sim.amount / 100000) * 20;
+                    score += (this.sim.days / 90) * 25;
+                    score += (this.sim.discount / 25) * 20;
+
+                    if (this.sim.customerType === 'Retail') score += 20;
+                    else if (this.sim.customerType === 'SME') score += 10;
+
+                    if (this.sim.history === 'POOR') score += 25;
+                    else if (this.sim.history === 'MODERATE') score += 10;
+
+                    return Math.min(Math.round(score), 99);
+                },
+
+                get riskLevel() {
+                    const score = this.calculatedRiskScore;
+                    if (score >= 70) return 'Tinggi (High Risk)';
+                    if (score >= 45) return 'Sedang (Medium Risk)';
+                    return 'Rendah (Low Risk)';
+                },
+
+                get riskColorClass() {
+                    const score = this.calculatedRiskScore;
+                    if (score >= 70) return 'text-rose-500';
+                    if (score >= 45) return 'text-amber-500';
+                    return 'text-emerald-500';
+                },
+
+                get riskBadgeClass() {
+                    const score = this.calculatedRiskScore;
+                    if (score >= 70) return 'bg-rose-100 text-rose-700 dark:bg-rose-950 dark:text-rose-300';
+                    if (score >= 45) return 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300';
+                    return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300';
+                },
+
+                get riskBgClass() {
+                    const score = this.calculatedRiskScore;
+                    if (score >= 70) return 'bg-rose-500';
+                    if (score >= 45) return 'bg-amber-500';
+                    return 'bg-emerald-500';
+                },
+
+                get riskAlertClass() {
+                    const score = this.calculatedRiskScore;
+                    if (score >= 70) return 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30';
+                    if (score >= 45) return 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/30';
+                    return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30';
+                },
+
+                get prescriptiveAction() {
+                    const score = this.calculatedRiskScore;
+                    if (score >= 70) {
+                        return 'Tolak pengajuan kredit penuh atau Wajibkan Down Payment (DP) 50% sebelum barang dikirim. Turunkan batas waktu jatuh tempo menjadi maksimal 15 hari.';
+                    } else if (score >= 45) {
+                        return 'Setujui dengan pengawasan: Aktifkan pengingat invoice otomatis via WhatsApp/Email pada H-7 & berikan imbalan Early Discount 2% jika dilunasi lebih cepat.';
+                    } else {
+                        return 'Setujui syarat kredit standar. Risiko keterlambatan pembayaran sangat rendah.';
+                    }
+                },
+
+                initChart() {
+                    const ctx = document.getElementById('rootCauseChart');
+                    if (!ctx) return;
+
+                    new Chart(ctx, {
+                        type: 'bar',
+                        data: {
+                            labels: ['Corporate', 'SME', 'Retail'],
+                            datasets: [
+                                {
+                                    label: 'Rata-Rata Diskon (%)',
+                                    data: [4, 11, 19],
+                                    backgroundColor: '#0284c7'
+                                },
+                                {
+                                    label: 'Rasio Late Payment (%)',
+                                    data: [8, 28, 67],
+                                    backgroundColor: '#f43f5e'
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { labels: { color: '#94a3b8', font: { size: 11 } } }
+                            },
+                            scales: {
+                                y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                                x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+
+        window.onload = function() {
+            setTimeout(() => {
+                const app = document.querySelector('[x-data="appData()"]');
+                if (app && app.__x) {
+                    app.__x.$data.initChart();
+                }
+            }, 300);
+        };
+    </script>
+</body>
+</html>
